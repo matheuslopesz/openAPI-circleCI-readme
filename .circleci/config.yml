@@ -48,15 +48,8 @@ jobs:
           name: "Instala a CLI do ReadMe"
           command: sudo npm install -g rdme@10
       - run:
-          name: "Debug - Mostrar Variáveis (exceto segredos)"
-          command: |
-            echo "Email: $README_API_EMAIL"
-            echo "Projeto: $README_API_PROJECT"
-            echo "senha: $README_API_PASSWORD"
-      - run:
           name: "login na CLI do ReadMe"
-          command: rdme login --email=matheuslopes.developer@gmail.com --password=121312kyzz --project=nexus-api-vhma
-
+          command: rdme login --email=$README_API_EMAIL --password=$README_API_PASSWORD --project=$README_API_PROJECT
       - run:
           name: "Publica a Documentação da API no ReadMe"
           # Lembre-se de ajustar o caminho para o arquivo que o Rswag gera.
@@ -68,7 +61,7 @@ jobs:
             echo "Publicando documentação para o slug dinâmico: $GENERATED_SLUG"
 
             # 2. Publica usando o slug gerado. Como é sempre único, a flag --yes não é necessária.
-            rdme openapi upload swagger/v1/swagger.yaml --key=$README_API_KEY --slug="$GENERATED_SLUG"
+            rdme openapi upload swagger/v1/swagger.yaml --key=$RDME_API_KEY --slug="$GENERATED_SLUG"
 
 workflows:
   poc_workflow:
