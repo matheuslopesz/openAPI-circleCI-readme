@@ -1,0 +1,176 @@
+#!/usr/bin/env bash
+
+# Script information
+
+VERSION="0.1.0"
+COMMAND_NAME="transform_openapi"
+
+# Default values for variables
+
+PREFIX=
+FILE=
+DEBUG=false
+
+# Help message
+
+function usage_main(){
+  cat <<EOM
+Usage: ${COMMAND_NAME} [OPTIONS] OPENAPI_FILE [OUTPUT_FILE]
+
+Transform OpenAPI file to be used in ReadMe.
+
+Arguments:
+  OPENAPI_FILE  OpenAPI file to be transformed
+  OUTPUT_FILE   Output file (default: OPENAPI_FILE.transformed)
+
+Options:
+  --prefix string        Prefix to add to operationId and tags
+  --help                 Show this help message
+  --debug                Enable verbose output
+  --version              Show version information
+EOM
+}
+
+# Show usage message and exit successfully
+function usage_exit(){
+  usage_main
+  exit
+}
+
+# Show usage message and exit with error code
+function usage_fail(){
+  usage_main
+  exit 2
+}
+
+# Transformations
+
+transform_camel_case() {
+  echo ${1//[ -]/_} | sed -E "s/_(.)/\u\1/g"
+}
+
+transform_pascal_case() {
+  echo ${1//[ -]/_} | sed -E "s/_(.)/\u\1/g; s/^(.)/\u\1/g"
+}
+
+transform_kebab_case() {
+  echo ${1//[ _]/-} | sed -E 's/([a-z0-9])([A-Z])/\1-\L\2/g'
+}
+
+transform_snake_case() {
+  echo ${1//[ -]/_} | sed -E 's/([a-z0-9])([A-Z])/\1_\L\2/g'
+}
+
+transform_prefix() {
+  echo $2$1
+}
+
+# Operations
+
+change_value() {
+  local key=$1
+  local transformation=transform_$2
+  local args=("${@:3}")
+
+  for value in $(sed -n "s/\s*$key:\s*\([a-zA-Z0-9-]\+\).*/\1/p" $FILE | uniq); do
+    local converted_value=$($transformation $value "${args[@]}")
+
+    sed -i "s/$key:\s*$value$/$key: $converted_value/g" $FILE
+  done
+}
+
+change_array_values() {
+  local key=$1
+  local transformation=transform_$2
+  local args=("${@:3}")
+
+  for value in $(sed -n "/$key:/,/\s*\w/ s/^\s*-\s*\(.*\)/\1/p" $FILE | uniq); do
+    local converted_value=$($transformation $value "${args[@]}")
+
+    sed -i "/$key:/,/^\s*\w/ s/\(\s\+\)-\s\+$value$/\1- $converted_value/g" $FILE
+  done
+}
+
+remove_server() {
+  local match=$1
+
+  sed -i "/servers:/,/^\w/ { /^\s*-.*$match/,/^\(\w\|\s*-\).*$/ { 0,//d; //b; d } }" $FILE
+}
+
+# Main actions
+function run(){
+  [[ $# -eq 0 ]] && usage_fail
+
+  local original_file=$1
+  local transformed_file=${2:-$original_file.transformed}
+
+  mkdir -p $(dirname $transformed_file)
+  cp $original_file $transformed_file
+
+  FILE=$transformed_file
+
+  transformations
+}
+
+function transformations(){
+  if [[ -n "$PREFIX" ]]; then
+    change_value operationId prefix $PREFIX
+    change_array_values tags prefix $PREFIX
+  fi
+  change_value operationId kebab_case
+  change_array_values tags kebab_case
+  remove_server staging
+}
+
+######################################################
+# When not being tested, run application as expected #
+######################################################
+if [ "$BASH_SOURCE" == "$0" ]; then
+  set -o errexit
+  set -o pipefail
+  set -u
+  set -e
+  # If no args are provided, display usage information
+  [[ $# -eq 0 ]] && usage_fail
+
+  # Loop through arguments, two at a time for key and value
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+
+    case "$key" in
+      --prefix)
+        PREFIX="$2"
+        shift
+        ;;
+      --help)
+        usage_exit
+        ;;
+      --debug)
+        DEBUG=true
+        ;;
+      --version)
+        echo "$VERSION"
+        exit 0
+        ;;
+      *)
+        if [ "${key:0:1}" = '-' ]; then
+          usage_fail
+        else
+          break
+        fi
+        ;;
+    esac
+    shift # past argument or value
+  done
+
+  if [ $DEBUG == true ]; then
+    set -x
+  fi
+
+  run $@
+
+  exit 0
+fi
+#############################
+# End application run logic #
+#############################
