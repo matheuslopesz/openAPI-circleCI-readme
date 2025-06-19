@@ -20,7 +20,7 @@ jobs:
       - run:
           name: "Publica a documentação da API"
           # Usando o caminho exato do seu arquivo.
-          command: rdme openapi:upload api-docs/openapi.yml --key=$README_API_KEY --api=$README_API_SLUG
+          command: rdme openapi upload api-docs/openapi.yml --key=$README_API_KEY
 
 workflows:
   version: 2
