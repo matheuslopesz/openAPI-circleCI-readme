@@ -74,7 +74,7 @@ jobs:
             echo "📘 Publicando documentação no ReadMe com slug: $GENERATED_SLUG"
             cat swagger/v1/swagger.yaml
             echo "Usando chave de API: $RDME_API_KEY"
-            rdme openapi upload swagger/v1/swagger.yaml --key="$RDME_API_KEY" --slug="$GENERATED_SLUG"
+            rdme openapi upload api-docs/openapi.yaml --key="$RDME_API_KEY" --slug="$GENERATED_SLUG"
 
 workflows:
   poc_workflow:
