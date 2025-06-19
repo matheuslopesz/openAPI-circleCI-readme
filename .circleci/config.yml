@@ -58,8 +58,7 @@ jobs:
           name: "Publica a Documentação da API no ReadMe"
           # Lembre-se de ajustar o caminho para o arquivo que o Rswag gera.
           # O padrão é 'swagger/v1/swagger.yaml'.
-          command: rdme openapi upload swagger/v1/swagger.yaml.transformed --key=$README_API_KEY
-
+          command: cat swagger/v1/swagger.yaml.transformed
 workflows:
   poc_workflow:
     jobs:
