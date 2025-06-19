@@ -11,7 +11,7 @@ jobs:
           RAILS_ENV: test
           # Conecta-se ao banco de dados 'app_test' definido no config/database.yml
           DATABASE_URL: "postgresql://postgres:password@localhost/app_test"
-      - image: cimg/postgres:13-node # Versão do Postgres alinhada com seu docker-compose.yml
+      - image: cimg/postgres:13.9
         environment:
           POSTGRES_USER: postgres
           # Cria o banco de dados 'app_test' para corresponder ao database.yml
@@ -52,7 +52,7 @@ jobs:
           name: "Publica a Documentação da API no ReadMe"
           # Lembre-se de ajustar o caminho para o arquivo que o Rswag gera.
           # O padrão é 'swagger/v1/swagger.yaml'.
-          command: rdme openapi upload swagger/v1/swagger.yaml --key=$README_API_KEY --api=$README_API_SLUG
+          command: rdme openapi upload swagger/v1/swagger.yaml --key=$README_API_KEY
 
 workflows:
   poc_workflow:
