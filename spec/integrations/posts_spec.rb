@@ -2,7 +2,7 @@
 require 'swagger_helper'
 
 # Descrevemos qual API estamos documentando
-describe 'Posts API' do
+describe 'Posts API', type: :request do
 
   # Definimos o caminho (endpoint)
   path '/posts' do
