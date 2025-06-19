@@ -43,18 +43,31 @@ jobs:
           name: "Gera Especificação OpenAPI com Rswag"
           command: bundle exec rails rswag:specs:swaggerize
 
-      # -- Etapa 3: Publicar --
+     # -- Etapa 3: Publicar --
       - run:
           name: "Instala a CLI do ReadMe"
           command: sudo npm install -g rdme@10
+
+      - run:
+          name: "Verifica variáveis obrigatórias e arquivo gerado"
+          command: |
+            if [ -z "$RDME_API_KEY" ]; then
+              echo "❌ Variável RDME_API_KEY não definida!"; exit 1;
+            fi
+
+            if [ ! -f swagger/v1/swagger.yaml ]; then
+              echo "❌ Arquivo swagger/v1/swagger.yaml não encontrado!"; exit 1;
+            fi
+
       - run:
           name: "Publica a Documentação da API no ReadMe"
-          # Lembre-se de ajustar o caminho para o arquivo que o Rswag gera.
-          # O padrão é 'swagger/v1/swagger.yaml'.
           command: |
+            SLUG_PREFIX="minha-api-poc"
+            COMMIT_HASH=$(echo $CIRCLE_SHA1 | cut -c 1-7)
+            GENERATED_SLUG="${SLUG_PREFIX}-${COMMIT_HASH}"
 
-
-            rdme openapi upload swagger/v1/swagger.yaml --key=$RDME_API_KEY --slug=1212333
+            echo "📘 Publicando documentação no ReadMe com slug: $GENERATED_SLUG"
+            rdme openapi upload swagger/v1/swagger.yaml --key="$RDME_API_KEY" --slug="$GENERATED_SLUG"
 
 workflows:
   poc_workflow:
