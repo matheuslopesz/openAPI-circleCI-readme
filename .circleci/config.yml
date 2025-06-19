@@ -55,6 +55,7 @@ jobs:
       - run:
           name: "Publica a Documentação da API no ReadMe"
           command: |
+          
             SLUG_PREFIX="minha-api-poc"
             COMMIT_HASH=$(echo $CIRCLE_SHA1 | cut -c 1-7)
             GENERATED_SLUG="${SLUG_PREFIX}-${COMMIT_HASH}"
