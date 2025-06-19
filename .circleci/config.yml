@@ -1,34 +1,64 @@
-# Arquivo de Configuração do CircleCI para Publicar Documentação no ReadMe
+# Arquivo de Configuração do CircleCI para a POC de Automação de Documentação
 version: 2.1
 
 jobs:
-  publicar-documentacao-readme:
-    # Usaremos uma imagem Docker que contém Node.js para instalar a CLI 'rdme'.
+  # Um único job que executa todas as etapas em sequência
+  gerar_e_publicar_documentacao_poc:
+    # O ambiente precisa de Ruby (para testes/Rswag) e Node.js (para a CLI rdme)
     docker:
-      - image: cimg/node:lts
+      - image: cimg/ruby:3.2.0-node
+        environment:
+          RAILS_ENV: test
+          # Conecta-se ao banco de dados 'app_test' definido no config/database.yml
+          DATABASE_URL: "postgresql://postgres:password@localhost/app_test"
+      - image: cimg/postgres:13-node # Versão do Postgres alinhada com seu docker-compose.yml
+        environment:
+          POSTGRES_USER: postgres
+          # Cria o banco de dados 'app_test' para corresponder ao database.yml
+          POSTGRES_DB: app_test
+          POSTGRES_PASSWORD: password
 
     steps:
-      # 1. Pega o código do seu repositório.
       - checkout
 
-      # 2. Instala a CLI do ReadMe.
+      # -- Etapa de Preparação --
       - run:
-          name: "Instala a CLI rdme"
-          command: sudo npm install -g rdme@10
+          name: "Instala Dependências Ruby"
+          command: bundle install --jobs=4 --retry=3 --path vendor/bundle
+      - run:
+          name: "Prepara Banco de Dados de Teste"
+          command: |
+            # Espera o container do Postgres ficar pronto
+            dockerize -wait tcp://localhost:5432 -timeout 1m
+            # Roda os comandos do Rails para preparar o DB de teste
+            bundle exec rails db:create db:schema:load
 
-      # 3. Publica o arquivo OpenAPI no ReadMe usando os segredos.
+      # -- Etapa 1: Testar --
       - run:
-          name: "Publica a documentação da API"
-          # Usando o caminho exato do seu arquivo.
-          command: rdme openapi upload api-docs/openapi.yaml --key=$README_API_KEY
+          name: "Roda Testes (RSpec)"
+          # Se este passo falhar, o pipeline para aqui.
+          command: bundle exec rspec
+
+      # -- Etapa 2: Gerar --
+      - run:
+          name: "Gera Especificação OpenAPI com Rswag"
+          command: bundle exec rails rswag:specs:swaggerize
+
+      # -- Etapa 3: Publicar --
+      - run:
+          name: "Instala a CLI do ReadMe"
+          command: sudo npm install -g rdme@10
+      - run:
+          name: "Publica a Documentação da API no ReadMe"
+          # Lembre-se de ajustar o caminho para o arquivo que o Rswag gera.
+          # O padrão é 'swagger/v1/swagger.yaml'.
+          command: rdme openapi upload swagger/v1/swagger.yaml --key=$README_API_KEY --api=$README_API_SLUG
 
 workflows:
-  version: 2
-  publicar-docs-workflow:
+  poc_workflow:
     jobs:
-      - publicar-documentacao-readme:
-          # Roda o job apenas em pushes para a branch 'main'.
+      - gerar_e_publicar_documentacao_poc:
           filters:
             branches:
               only:
-                - main
+                - main # Roda apenas na sua branch principal
