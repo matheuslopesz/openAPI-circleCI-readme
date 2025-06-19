@@ -138,6 +138,46 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
+  /autores:
+    get:
+      tags:
+        - Autores
+      summary: Lista todos os autores
+      description: Retorna uma lista de todos os autores cadastrados na plataforma.
+      operationId: getAuthors
+      responses:
+        '200':
+          description: Uma lista de autores.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthorsArray'
+
+  /autores/{authorId}:
+    get:
+      tags:
+        - Autores
+      summary: Busca um autor pelo ID
+      description: Retorna os detalhes completos de um único autor.
+      operationId: getAuthorById
+      parameters:
+        - name: authorId
+          in: path
+          required: true
+          description: ID numérico do autor a ser retornado
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Detalhes do autor.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Author'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
 components:
   schemas:
     Post:
@@ -176,6 +216,27 @@ components:
         - title
         - content
         - author_id
+    Author:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 42
+        name:
+          type: string
+          example: "Matheus Lopes"
+        email:
+          type: string
+          format: email
+          example: "matheus.lopes@example.com"
+        bio:
+          type: string
+          example: "Desenvolvedor especialista em automação e CI/CD."
+        joined_at:
+          type: string
+          format: date-time
+          example: "2024-01-10T10:00:00Z"
     AuthorSummary:
       type: object
       properties:
@@ -190,6 +251,10 @@ components:
       type: array
       items:
         $ref: '#/components/schemas/Post'
+    AuthorsArray:
+      type: array
+      items:
+        $ref: '#/components/schemas/AuthorSummary'
     Error:
       type: object
       properties:
@@ -215,4 +280,3 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
-
