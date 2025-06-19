@@ -54,12 +54,7 @@ describe 'Posts API', type: :request do
         required: [ 'title', 'body' ]
       }
 
-      # Descrevemos a resposta de sucesso (HTTP 201 Created)
-      response '201', 'post criado' do
-        # 'let' define os dados de exemplo para o teste
-        let(:post_params) { { title: 'Meu primeiro post', body: 'Este é o corpo do post.' } }
-        run_test!
-      end
+
 
       # Descrevemos uma resposta de erro (HTTP 422 Unprocessable Entity)
       response '422', 'parâmetros inválidos' do

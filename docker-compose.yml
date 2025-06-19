@@ -12,13 +12,9 @@ services:
       - "5432:5432"
 
   web:
-    build:
-      context: .
-      args:
-        USER_ID: 1000    # troque para o seu id -u
-        GROUP_ID: 1000   # troque para o seu id -g
+    build: .
     volumes:
-      - .:/rails
+      - .:/app
       - bundle:/usr/local/bundle
     ports:
       - "3000:3000"
@@ -26,8 +22,8 @@ services:
       - db
     environment:
       RAILS_ENV: development
-      DATABASE_URL: postgres://postgres:password@db:5432/postgres
-    working_dir: /rails
+      DATABASE_URL: postgres://postgres:password@db:5432/app_development
+    working_dir: /app
     command: bash -c "bundle exec rails server -b 0.0.0.0 -p 3000"
 
 volumes:

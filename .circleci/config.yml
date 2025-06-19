@@ -42,21 +42,15 @@ jobs:
       - run:
           name: "Gera Especificação OpenAPI com Rswag"
           command: bundle exec rails rswag:specs:swaggerize
-      - run:
-          name: "Transforma o arquivo OpenAPI"
-          # Garante que o script é executável e o executa.
-          # Ele criará um novo arquivo: swagger/v1/swagger.yaml.transformed
-          command: |
-            chmod +x bin/transform_openapi
-            ./bin/transform_openapi swagger/v1/swagger.yaml
 
       # -- Etapa 3: Publicar --
       - run:
           name: "Instala a CLI do ReadMe"
           command: sudo npm install -g rdme@10
       - run:
-          name: "Publica a Documentação da API no ReadMe (ARQUIVO ORIGINAL)"
-          # MUDANÇA: Apontando para o arquivo original gerado pelo Rswag para o teste.
+          name: "Publica a Documentação da API no ReadMe"
+          # Lembre-se de ajustar o caminho para o arquivo que o Rswag gera.
+          # O padrão é 'swagger/v1/swagger.yaml'.
           command: rdme openapi upload swagger/v1/swagger.yaml --key=$README_API_KEY
 
 workflows:
