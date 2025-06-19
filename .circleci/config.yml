@@ -1,31 +1,34 @@
-# Arquivo de Configuração do CircleCI - Versão "Primeiros Passos"
+# Arquivo de Configuração do CircleCI para Publicar Documentação no ReadMe
 version: 2.1
 
-# 'jobs' são as tarefas que nosso pipeline irá executar.
 jobs:
-  ola-circleci: # Demos um nome simples e claro para o nosso único job.
-    # 'docker' define o ambiente onde o código vai rodar.
-    # Usaremos apenas a imagem do Ruby, sem banco de dados por enquanto.
+  publicar-documentacao-readme:
+    # Usaremos uma imagem Docker que contém Node.js para instalar a CLI 'rdme'.
     docker:
-      - image: cimg/ruby:3.2.0
+      - image: cimg/node:lts
 
-    # 'steps' são os comandos que serão executados.
     steps:
       # 1. Pega o código do seu repositório.
       - checkout
 
-      # 2. Roda um comando simples para provar que tudo funcionou.
+      # 2. Instala a CLI do ReadMe.
       - run:
-          name: "Verificando se o pipeline está funcionando"
-          command: |
-            echo "---------------------------------------------------------"
-            echo "Parabéns! Seu primeiro pipeline do CircleCI foi executado!"
-            echo "O próximo passo será adicionar os testes e a publicação."
-            echo "---------------------------------------------------------"
+          name: "Instala a CLI rdme"
+          command: sudo npm install -g rdme@10
 
-# 'workflows' definem quando executar os jobs.
+      # 3. Publica o arquivo OpenAPI no ReadMe usando os segredos.
+      - run:
+          name: "Publica a documentação da API"
+          # Usando o caminho exato do seu arquivo.
+          command: rdme openapi:upload api-docs/openapi.yml --key=$README_API_KEY --api=$README_API_SLUG
+
 workflows:
   version: 2
-  meu-primeiro-workflow:
+  publicar-docs-workflow:
     jobs:
-      - ola-circleci # Executa nosso job 'ola-circleci' em cada push.
+      - publicar-documentacao-readme:
+          # Roda o job apenas em pushes para a branch 'main'.
+          filters:
+            branches:
+              only:
+                - main
