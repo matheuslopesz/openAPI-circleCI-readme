@@ -52,18 +52,6 @@ jobs:
           command: |
             sudo npm install -g rdme@10
             rdme --version
-
-      - run:
-          name: "Verifica variáveis obrigatórias e arquivo gerado"
-          command: |
-            if [ -z "$RDME_API_KEY" ]; then
-              echo "❌ Variável RDME_API_KEY não definida!"; exit 1;
-            fi
-
-            if [ ! -f swagger/v1/swagger.yaml ]; then
-              echo "❌ Arquivo swagger/v1/swagger.yaml não encontrado!"; exit 1;
-            fi
-
       - run:
           name: "Publica a Documentação da API no ReadMe"
           command: |
@@ -71,10 +59,7 @@ jobs:
             COMMIT_HASH=$(echo $CIRCLE_SHA1 | cut -c 1-7)
             GENERATED_SLUG="${SLUG_PREFIX}-${COMMIT_HASH}"
 
-            echo "📘 Publicando documentação no ReadMe com slug: $GENERATED_SLUG"
-            cat swagger/v1/swagger.yaml
-            echo "Usando chave de API: $RDME_API_KEY"
-            rdme openapi upload api-docs/openapi.yaml --key="$RDME_API_KEY" --slug="$GENERATED_SLUG"
+             command: rdme openapi upload api-docs/openapi.yaml --key=$README_API_KEY
 
 workflows:
   poc_workflow:
