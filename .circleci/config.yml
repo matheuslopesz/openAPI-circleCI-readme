@@ -1,71 +1,33 @@
+# Arquivo de Configuração do CircleCI para Publicar Documentação no ReadMe
 version: 2.1
 
 jobs:
-  gerar_e_publicar_documentacao_poc:
+  publicar-documentacao-readme:
+    # Usaremos uma imagem Docker que contém Node.js para instalar a CLI 'rdme'.
     docker:
-      - image: cimg/ruby:3.2.0 # Imagem principal com Ruby
-        environment:
-          RAILS_ENV: test
-          DATABASE_URL: "postgresql://postgres:password@localhost/app_test"
-      - image: cimg/postgres:13.9
-        environment:
-          POSTGRES_USER: postgres
-          POSTGRES_DB: app_test
-          POSTGRES_PASSWORD: password
+      - image: cimg/node:lts
 
     steps:
+      # 1. Pega o código do seu repositório.
       - checkout
 
-      # -- Etapa de Preparação --
+      # 2. Instala a CLI do ReadMe.
       - run:
-          name: "Instala Node.js 18"
-          command: |
-            curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
-            sudo apt-get install -y nodejs
-            node -v
-            npm -v
+          name: "Instala a CLI rdme"
+          command: sudo npm install -g rdme@10
 
+      # 3. Publica o arquivo OpenAPI no ReadMe usando os segredos.
       - run:
-          name: "Instala Dependências Ruby"
-          command: bundle install --jobs=4 --retry=3 --path vendor/bundle
-
-      - run:
-          name: "Prepara Banco de Dados de Teste"
-          command: |
-            dockerize -wait tcp://localhost:5432 -timeout 1m
-            bundle exec rails db:create
-            bundle exec rails db:migrate
-
-      # -- Etapa 1: Testar --
-      - run:
-          name: "Roda Testes (RSpec)"
-          command: bundle exec rspec
-
-      # -- Etapa 2: Gerar --
-      - run:
-          name: "Gera Especificação OpenAPI com Rswag"
-          command: bundle exec rails rswag:specs:swaggerize
-
-      # -- Etapa 3: Publicar --
-      - run:
-          name: "Instala a CLI do ReadMe"
-          command: |
-            sudo npm install -g rdme@10
-            rdme --version
-      - run:
-          name: "Publica a Documentação da API no ReadMe"
-          command: |
-          
-            SLUG_PREFIX="minha-api-poc"
-            COMMIT_HASH=$(echo $CIRCLE_SHA1 | cut -c 1-7)
-            GENERATED_SLUG="${SLUG_PREFIX}-${COMMIT_HASH}"
-
-            rdme openapi upload api-docs/openapi.yaml --key=$README_API_KEY --slug=$GENERATED_SLUG
+          name: "Publica a documentação da API"
+          # Usando o caminho exato do seu arquivo.
+          command: rdme openapi upload api-docs/openapi.yaml --key=$README_API_KEY
 
 workflows:
-  poc_workflow:
+  version: 2
+  publicar-docs-workflow:
     jobs:
-      - gerar_e_publicar_documentacao_poc:
+      - publicar-documentacao-readme:
+          # Roda o job apenas em pushes para a branch 'main'.
           filters:
             branches:
               only:
