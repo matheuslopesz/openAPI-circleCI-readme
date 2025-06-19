@@ -48,6 +48,12 @@ jobs:
           name: "Instala a CLI do ReadMe"
           command: sudo npm install -g rdme@10
       - run:
+          name: "Debug - Mostrar Variáveis (exceto segredos)"
+          command: |
+            echo "Email: $README_API_EMAIL"
+            echo "Projeto: $README_API_PROJECT"
+            echo "senha: $README_API_PASSWORD"
+      - run:
           name: "login na CLI do ReadMe"
           command: rdme login --email=$README_API_EMAIL --password=$README_API_PASSWORD --project=$README_API_PROJECT
       - run:
