@@ -28,10 +28,9 @@ jobs:
       - run:
           name: "Prepara Banco de Dados de Teste"
           command: |
-            # Espera o container do Postgres ficar pronto
             dockerize -wait tcp://localhost:5432 -timeout 1m
-            # Roda os comandos do Rails para preparar o DB de teste
-            bundle exec rails db:create db:schema:load
+            bundle exec rails db:create
+            bundle exec rails db:migrate
 
       # -- Etapa 1: Testar --
       - run:
