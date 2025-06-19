@@ -45,7 +45,7 @@ describe 'Posts API', type: :request do
 
       # 'parameter' descreve um parâmetro que a requisição deve ter.
       # Neste caso, o corpo (body) da requisição.
-      parameter name: :post, in: :body, schema: {
+      parameter name: :post_params, in: :body, schema: {
         type: :object,
         properties: {
           title: { type: :string },
@@ -57,14 +57,14 @@ describe 'Posts API', type: :request do
       # Descrevemos a resposta de sucesso (HTTP 201 Created)
       response '201', 'post criado' do
         # 'let' define os dados de exemplo para o teste
-        let(:post) { { title: 'Meu primeiro post', body: 'Este é o corpo do post.' } }
+        let(:post_params) { { title: 'Meu primeiro post', body: 'Este é o corpo do post.' } }
         run_test!
       end
 
       # Descrevemos uma resposta de erro (HTTP 422 Unprocessable Entity)
       response '422', 'parâmetros inválidos' do
         # Exemplo de dados que causariam um erro (título faltando)
-        let(:post) { { body: 'Corpo sem título.' } }
+        let(:post_params) { { body: 'Corpo sem título.' } }
         run_test!
       end
     end
