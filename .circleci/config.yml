@@ -48,9 +48,6 @@ jobs:
           name: "Instala a CLI do ReadMe"
           command: sudo npm install -g rdme@10
       - run:
-          name: "login na CLI do ReadMe"
-          command: rdme login --email=$README_API_EMAIL --password=$README_API_PASSWORD --project=$README_API_PROJECT
-      - run:
           name: "Publica a Documentação da API no ReadMe"
           # Lembre-se de ajustar o caminho para o arquivo que o Rswag gera.
           # O padrão é 'swagger/v1/swagger.yaml'.
