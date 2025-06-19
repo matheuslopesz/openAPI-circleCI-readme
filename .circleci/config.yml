@@ -1,0 +1,31 @@
+# Arquivo de Configuração do CircleCI - Versão "Primeiros Passos"
+version: 2.1
+
+# 'jobs' são as tarefas que nosso pipeline irá executar.
+jobs:
+  ola-circleci: # Demos um nome simples e claro para o nosso único job.
+    # 'docker' define o ambiente onde o código vai rodar.
+    # Usaremos apenas a imagem do Ruby, sem banco de dados por enquanto.
+    docker:
+      - image: cimg/ruby:3.2.0
+
+    # 'steps' são os comandos que serão executados.
+    steps:
+      # 1. Pega o código do seu repositório.
+      - checkout
+
+      # 2. Roda um comando simples para provar que tudo funcionou.
+      - run:
+          name: "Verificando se o pipeline está funcionando"
+          command: |
+            echo "---------------------------------------------------------"
+            echo "Parabéns! Seu primeiro pipeline do CircleCI foi executado!"
+            echo "O próximo passo será adicionar os testes e a publicação."
+            echo "---------------------------------------------------------"
+
+# 'workflows' definem quando executar os jobs.
+workflows:
+  version: 2
+  meu-primeiro-workflow:
+    jobs:
+      - ola-circleci # Executa nosso job 'ola-circleci' em cada push.
