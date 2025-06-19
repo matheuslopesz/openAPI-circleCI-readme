@@ -59,7 +59,7 @@ jobs:
             COMMIT_HASH=$(echo $CIRCLE_SHA1 | cut -c 1-7)
             GENERATED_SLUG="${SLUG_PREFIX}-${COMMIT_HASH}"
 
-            rdme openapi upload api-docs/openapi.yaml --key=$README_API_KEY
+            rdme openapi upload api-docs/openapi.yaml --key=$README_API_KEY --slug=$GENERATED_SLUG
 
 workflows:
   poc_workflow:
